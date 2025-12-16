@@ -13,9 +13,13 @@ export PATH=$JAVA_HOME/bin:$PATH
 ./mvnw clean spring-boot:run
 ```
 
+**Note:** The app runs in the foreground. To test endpoints, open a new terminal and use curl or Postman.
+
 ### Locally:
 
 ```bash
 docker compose up -d
 mvn spring-boot:run
 ```
+
+**Note:** The app runs in the foreground. To test endpoints, open a new terminal and use curl or Postman.
