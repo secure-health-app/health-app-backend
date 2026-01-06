@@ -2,6 +2,7 @@ package com.securehealthapp.health_app_backend.security.jwt;
 
 import java.security.Key;
 import java.util.Date;
+import javax.crypto.SecretKey;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,17 +38,17 @@ public class JwtUtils {
         .compact();
   }
 
-  private Key key() {
+  private SecretKey key() {
     return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
   }
 
   public String getUserNameFromJwtToken(String token) {
-    return Jwts.parser().setSigningKey(key()).build().parseSignedClaims(token).getPayload().getSubject();
+    return Jwts.parser().verifyWith(key()).build().parseSignedClaims(token).getPayload().getSubject();
   }
 
   public boolean validateJwtToken(String authToken) {
     try {
-      Jwts.parser().setSigningKey(key()).build().parseSignedClaims(authToken);
+      Jwts.parser().verifyWith(key()).build().parseSignedClaims(authToken);
       return true;
     } catch (Exception e) {
       logger.error("Invalid JWT token: {}", e.getMessage());
