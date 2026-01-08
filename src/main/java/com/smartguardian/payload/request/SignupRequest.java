@@ -1,4 +1,4 @@
-package com.securehealthapp.health_app_backend.payload.request;
+package com.smartguardian.payload.request;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;

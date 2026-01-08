@@ -1,10 +1,10 @@
-package com.securehealthapp.health_app_backend;
+package com.smartguardian;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class HealthAppBackendApplicationTests {
+class SmartGuardianApplicationTests {
 
 	@Test
 	void contextLoads() {

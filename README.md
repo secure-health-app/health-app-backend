@@ -1,4 +1,6 @@
-# health-app-backend
+# SmartGuardian Backend
+
+AI-powered health monitoring and fall detection system for elderly care.
 
 ## How to run the backend (Spring Boot)
 

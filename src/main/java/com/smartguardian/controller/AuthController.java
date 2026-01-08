@@ -1,4 +1,4 @@
-package com.securehealthapp.health_app_backend.controller;
+package com.smartguardian.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,14 +9,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import com.securehealthapp.health_app_backend.model.User;
-import com.securehealthapp.health_app_backend.payload.request.LoginRequest;
-import com.securehealthapp.health_app_backend.payload.request.SignupRequest;
-import com.securehealthapp.health_app_backend.payload.response.JwtResponse;
-import com.securehealthapp.health_app_backend.payload.response.MessageResponse;
-import com.securehealthapp.health_app_backend.repository.UserRepository;
-import com.securehealthapp.health_app_backend.security.jwt.JwtUtils;
-import com.securehealthapp.health_app_backend.security.services.UserDetailsImpl;
+import com.smartguardian.model.User;
+import com.smartguardian.payload.request.LoginRequest;
+import com.smartguardian.payload.request.SignupRequest;
+import com.smartguardian.payload.response.JwtResponse;
+import com.smartguardian.payload.response.MessageResponse;
+import com.smartguardian.repository.UserRepository;
+import com.smartguardian.security.jwt.JwtUtils;
+import com.smartguardian.security.services.UserDetailsImpl;
 
 @RestController
 @RequestMapping("/api/auth")

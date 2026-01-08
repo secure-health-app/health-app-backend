@@ -1,4 +1,4 @@
-package com.securehealthapp.health_app_backend.security;
+package com.smartguardian.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,9 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.securehealthapp.health_app_backend.security.jwt.AuthEntryPointJwt;
-import com.securehealthapp.health_app_backend.security.jwt.AuthTokenFilter;
-import com.securehealthapp.health_app_backend.security.services.UserDetailsServiceImpl;
+import com.smartguardian.security.jwt.AuthEntryPointJwt;
+import com.smartguardian.security.jwt.AuthTokenFilter;
+import com.smartguardian.security.services.UserDetailsServiceImpl;
 
 @Configuration
 @EnableMethodSecurity

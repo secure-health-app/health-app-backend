@@ -1,7 +1,7 @@
-package com.securehealthapp.health_app_backend.security.services;
+package com.smartguardian.security.services;
 
-import com.securehealthapp.health_app_backend.model.User;
-import com.securehealthapp.health_app_backend.repository.UserRepository;
+import com.smartguardian.model.User;
+import com.smartguardian.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,4 +1,4 @@
-package com.securehealthapp.health_app_backend.security.jwt;
+package com.smartguardian.security.jwt;
 
 import java.io.IOException;
 

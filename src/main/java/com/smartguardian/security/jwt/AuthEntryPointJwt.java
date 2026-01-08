@@ -1,4 +1,4 @@
-package com.securehealthapp.health_app_backend.security.jwt;
+package com.smartguardian.security.jwt;
 
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -27,6 +27,6 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
     final ObjectMapper mapper = new ObjectMapper();
-    mapper.writeValue(response.getOutputStream(), new com.securehealthapp.health_app_backend.payload.response.MessageResponse("Error: Unauthorized"));
+    mapper.writeValue(response.getOutputStream(), new com.smartguardian.payload.response.MessageResponse("Error: Unauthorized"));
   }
 }

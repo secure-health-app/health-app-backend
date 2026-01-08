@@ -1,4 +1,4 @@
-package com.securehealthapp.health_app_backend.model;
+package com.smartguardian.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;

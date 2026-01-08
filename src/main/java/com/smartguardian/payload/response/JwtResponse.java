@@ -1,4 +1,4 @@
-package com.securehealthapp.health_app_backend.payload.response;
+package com.smartguardian.payload.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,7 +1,7 @@
-package com.securehealthapp.health_app_backend.security.services;
+package com.smartguardian.security.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.securehealthapp.health_app_backend.model.User;
+import com.smartguardian.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

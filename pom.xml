@@ -8,11 +8,11 @@
 		<version>3.5.7</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.securehealthapp</groupId>
-	<artifactId>health-app-backend</artifactId>
+	<groupId>com.smartguardian</groupId>
+	<artifactId>smartguardian-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Health App Backend</name>
-	<description>Secure AI-integrated digital health backend for fall detection and biometric monitoring.</description>
+	<name>SmartGuardian Backend</name>
+	<description>AI-powered health monitoring and fall detection system for elderly care.</description>
 	<url/>
 	<licenses>
 		<license/>
