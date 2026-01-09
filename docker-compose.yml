@@ -4,9 +4,9 @@ services:
     image: postgres:15
     container_name: health_app_db
     environment:
-      POSTGRES_DB: healthapp
-      POSTGRES_USER: secureuser
-      POSTGRES_PASSWORD: securepassword
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
