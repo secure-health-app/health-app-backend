@@ -5,9 +5,6 @@ import lombok.Data;
 
 @Data
 public class SignupRequest {
-    @NotBlank
-    @Size(min = 3, max = 50)
-    private String username;
 
     @NotBlank
     @Size(max = 50)

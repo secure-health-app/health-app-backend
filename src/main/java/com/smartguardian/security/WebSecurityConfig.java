@@ -56,29 +56,19 @@ public class WebSecurityConfig {
         .csrf(csrf -> csrf.disable())
         .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> 
-            auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/").permitAll() // Allow root access for health check
-                .requestMatchers("/error").permitAll()
-                .anyRequest().authenticated()
-        );
+            .authorizeHttpRequests(auth ->
+                    auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                            .requestMatchers("/api/auth/**").permitAll()
+                            .requestMatchers("/api/test/public").permitAll()   // ✅ ADD THIS
+                            .requestMatchers("/").permitAll()
+                            .requestMatchers("/error").permitAll()
+                            .anyRequest().authenticated()
+            );
+
 
     http.authenticationProvider(authenticationProvider());
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     return http.build();
-  }
-
-  @Bean
-  public org.springframework.web.filter.CorsFilter corsFilter() {
-    org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
-    org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
-    config.setAllowCredentials(true);
-    config.addAllowedOriginPattern("*");
-    config.addAllowedHeader("*");
-    config.addAllowedMethod("*");
-    source.registerCorsConfiguration("/**", config);
-    return new org.springframework.web.filter.CorsFilter(source);
   }
 
   @Bean

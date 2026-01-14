@@ -1,5 +1,6 @@
 package com.smartguardian.security.jwt;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import javax.crypto.SecretKey;
@@ -38,9 +39,9 @@ public class JwtUtils {
         .compact();
   }
 
-  private SecretKey key() {
-    return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
-  }
+    private SecretKey key() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
 
   public String getUserNameFromJwtToken(String token) {
     return Jwts.parser().verifyWith(key()).build().parseSignedClaims(token).getPayload().getSubject();
