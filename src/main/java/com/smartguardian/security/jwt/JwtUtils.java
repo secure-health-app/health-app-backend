@@ -21,11 +21,11 @@ import io.jsonwebtoken.security.Keys;
 public class JwtUtils {
   private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-  @Value("${securehealthapp.app.jwtSecret}")
-  private String jwtSecret;
+    @Value("${smartguardian.app.jwtSecret}")
+    private String jwtSecret;
 
-  @Value("${securehealthapp.app.jwtExpirationMs}")
-  private int jwtExpirationMs;
+    @Value("${smartguardian.app.jwtExpirationMs}")
+    private int jwtExpirationMs;
 
   public String generateJwtToken(Authentication authentication) {
 
