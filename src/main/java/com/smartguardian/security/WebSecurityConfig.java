@@ -59,12 +59,12 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth ->
                     auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                             .requestMatchers("/api/auth/**").permitAll()
-                            .requestMatchers("/api/test/public").permitAll()   // ✅ ADD THIS
+                            .requestMatchers("/api/test/public").permitAll()
+                            .requestMatchers("/favicon.ico").permitAll()
                             .requestMatchers("/").permitAll()
                             .requestMatchers("/error").permitAll()
                             .anyRequest().authenticated()
             );
-
 
     http.authenticationProvider(authenticationProvider());
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

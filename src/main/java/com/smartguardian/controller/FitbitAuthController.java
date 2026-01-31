@@ -32,20 +32,26 @@ public class FitbitAuthController {
     @GetMapping("/connect")
     public void connectToFitbit(HttpServletResponse response) throws IOException {
 
-        String scopes = "activity heartrate sleep profile";
+        String scopes = "activity heartrate sleep";
+        String cleanRedirectUri = redirectUri.trim();
 
         String authUrl =
                 "https://www.fitbit.com/oauth2/authorize" +
                 "?response_type=code" +
                 "&client_id=" + clientId +
-                "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) +
-                "&scope=" + URLEncoder.encode(scopes, StandardCharsets.UTF_8);
+                "&redirect_uri=" + URLEncoder.encode(cleanRedirectUri, StandardCharsets.UTF_8) +
+                "&scope=" + URLEncoder.encode(scopes, StandardCharsets.UTF_8) +
+                "&prompt=login";
+
+        // System.out.println("FITBIT AUTH URL = " + authUrl);
 
         response.sendRedirect(authUrl);
     }
 
     @GetMapping("/callback")
     public ResponseEntity<?> fitbitCallback(@RequestParam("code") String code) {
+        // System.out.println("REDIRECT URI USED = " + redirectUri); // Debug
+
         String tokenUrl = "https://api.fitbit.com/oauth2/token";
         
         RestTemplate restTemplate = new RestTemplate();
@@ -55,11 +61,10 @@ public class FitbitAuthController {
         String auth = clientId + ":" + clientSecret;
         String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
         headers.set("Authorization", "Basic " + encodedAuth);
-        
+
         MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
-        map.add("clientId", clientId);
         map.add("grant_type", "authorization_code");
-        map.add("redirect_uri", redirectUri);
+        map.add("redirect_uri", redirectUri.trim());
         map.add("code", code);
         
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
