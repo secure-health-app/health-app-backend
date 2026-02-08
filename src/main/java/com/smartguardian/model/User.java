@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "users",
        uniqueConstraints = {
@@ -32,6 +34,17 @@ public class User {
     @NotBlank
     @Size(max = 120)
     private String password;
+
+    // To persist fitbit tokens linked to the user
+    @Column(length = 2048)
+    private String fitbitAccessToken;
+
+    @Column(length = 2048)
+    private String fitbitRefreshToken;
+
+    private Instant fitbitTokenExpiry;
+
+    private String fitbitUserId;
 
     public User(String username, String email, String password) {
         this.username = username;

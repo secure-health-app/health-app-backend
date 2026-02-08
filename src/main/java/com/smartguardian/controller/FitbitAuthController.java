@@ -37,11 +37,11 @@ public class FitbitAuthController {
 
         String authUrl =
                 "https://www.fitbit.com/oauth2/authorize" +
-                "?response_type=code" +
-                "&client_id=" + clientId +
-                "&redirect_uri=" + URLEncoder.encode(cleanRedirectUri, StandardCharsets.UTF_8) +
-                "&scope=" + URLEncoder.encode(scopes, StandardCharsets.UTF_8) +
-                "&prompt=login";
+                        "?response_type=code" +
+                        "&client_id=" + clientId +
+                        "&redirect_uri=" + URLEncoder.encode(cleanRedirectUri, StandardCharsets.UTF_8) +
+                        "&scope=" + URLEncoder.encode(scopes, StandardCharsets.UTF_8) +
+                        "&prompt=login";
 
         // System.out.println("FITBIT AUTH URL = " + authUrl);
 
@@ -53,9 +53,9 @@ public class FitbitAuthController {
         // System.out.println("REDIRECT URI USED = " + redirectUri); // Debug
 
         String tokenUrl = "https://api.fitbit.com/oauth2/token";
-        
+
         RestTemplate restTemplate = new RestTemplate();
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         String auth = clientId + ":" + clientSecret;
@@ -66,9 +66,9 @@ public class FitbitAuthController {
         map.add("grant_type", "authorization_code");
         map.add("redirect_uri", redirectUri.trim());
         map.add("code", code);
-        
+
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        
+
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(tokenUrl, request, String.class);
             return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
