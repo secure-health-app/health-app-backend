@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smartguardian.payload.response.MessageResponse;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600) // browser remembers permission for 1 hour
 @RestController
 @RequestMapping("/api/test")
 public class TestController {

@@ -36,7 +36,7 @@ public class User {
     private String password;
 
     // To persist fitbit tokens linked to the user
-    @Column(length = 2048)
+    @Column(length = 2048, nullable = true)
     private String fitbitAccessToken;
 
     @Column(length = 2048)

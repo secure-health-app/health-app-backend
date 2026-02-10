@@ -1,7 +1,6 @@
 package com.smartguardian.security.jwt;
 
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 import javax.crypto.SecretKey;
 
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.smartguardian.security.services.UserDetailsImpl;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Component
@@ -39,9 +37,10 @@ public class JwtUtils {
         .compact();
   }
 
-    private SecretKey key() {
+  // converts secret string into a cryptographic key
+  private SecretKey key() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-    }
+  }
 
   public String getUserNameFromJwtToken(String token) {
     return Jwts.parser().verifyWith(key()).build().parseSignedClaims(token).getPayload().getSubject();

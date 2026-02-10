@@ -18,20 +18,21 @@ import com.smartguardian.repository.UserRepository;
 import com.smartguardian.security.jwt.JwtUtils;
 import com.smartguardian.security.services.UserDetailsImpl;
 
+// Class to handle API requests
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
   @Autowired
-  AuthenticationManager authenticationManager;
+  AuthenticationManager authenticationManager; // login
 
   @Autowired
-  UserRepository userRepository;
+  UserRepository userRepository; // saves/reads users from DB
 
   @Autowired
-  PasswordEncoder encoder;
+  PasswordEncoder encoder; // hashes passwords
 
   @Autowired
-  JwtUtils jwtUtils;
+  JwtUtils jwtUtils; // creates login tokens
 
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {

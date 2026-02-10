@@ -3,6 +3,7 @@ package com.smartguardian.payload.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+// sent from backend to frontend after successful login
 @Data
 @AllArgsConstructor
 public class JwtResponse {
