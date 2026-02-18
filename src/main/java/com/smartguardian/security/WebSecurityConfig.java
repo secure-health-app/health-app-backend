@@ -58,7 +58,12 @@ public class WebSecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth ->
                     auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                            .requestMatchers("/api/auth/**").permitAll()
+                            .requestMatchers(
+                                    org.springframework.http.HttpMethod.POST,
+                                    "/api/auth/signin",
+                                    "/api/auth/signup"
+                            ).permitAll()
+                            .requestMatchers("/api/auth/fitbit/**").permitAll()
                             .requestMatchers("/api/test/public").permitAll()
                             .requestMatchers("/favicon.ico").permitAll()
                             .requestMatchers("/").permitAll()
