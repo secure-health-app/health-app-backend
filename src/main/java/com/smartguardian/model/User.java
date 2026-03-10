@@ -46,6 +46,12 @@ public class User {
 
     private String fitbitUserId;
 
+    // the username of the caregiver who monitors this user
+    // set by the user in their profile settings
+    // used to route alerts to the right caregiver
+    @Column(nullable = true)
+    private String caregiverUsername;
+
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;

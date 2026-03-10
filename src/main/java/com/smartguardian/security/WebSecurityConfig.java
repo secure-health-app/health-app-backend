@@ -57,7 +57,9 @@ public class WebSecurityConfig {
                                 .requestMatchers("/favicon.ico").permitAll()
                                 .requestMatchers("/").permitAll()
                                 .requestMatchers("/error").permitAll()
+                                // Pi posts fall alerts — secured by device API key, not JWT
                                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/alerts/fall").permitAll()
+                                // all other alert endpoints require login (patient or caregiver)
                                 .anyRequest().authenticated()
                 );
 
@@ -68,9 +70,9 @@ public class WebSecurityConfig {
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        configuration.setAllowedOriginPatterns(java.util.List.of("*")); // Allow all origins
-        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allow all methods
-        configuration.setAllowedHeaders(java.util.List.of("*")); // Allow all headers
+        configuration.setAllowedOriginPatterns(java.util.List.of("*"));
+        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(java.util.List.of("*"));
         configuration.setAllowCredentials(true);
         org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

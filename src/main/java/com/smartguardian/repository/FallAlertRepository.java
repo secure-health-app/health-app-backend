@@ -12,6 +12,9 @@ public interface FallAlertRepository extends JpaRepository<FallAlert, Long> {
     // Fetch all unacknowledged alerts - used by the dashboard
     List<FallAlert> findByAcknowledgedFalse();
 
-    // Fetch alerts by device ID - useful for multi-device setups later
-    List<FallAlert> findByDeviceId(String deviceId);
+    // Find alerts by status, newest first
+    List<FallAlert> findByStatusOrderByDetectedAtDesc(String status);
+
+    // used by the caregiver endpoint - only returns alerts assigned to this caregiver
+    List<FallAlert> findByStatusAndAssignedCaregiverOrderByDetectedAtDesc(String status, String assignedCaregiver);
 }
