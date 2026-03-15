@@ -17,4 +17,6 @@ public interface FallAlertRepository extends JpaRepository<FallAlert, Long> {
 
     // used by the caregiver endpoint - only returns alerts assigned to this caregiver
     List<FallAlert> findByStatusAndAssignedCaregiverOrderByDetectedAtDesc(String status, String assignedCaregiver);
+
+    List<FallAlert> findByUserNameOrderByDetectedAtDesc(String userName);
 }

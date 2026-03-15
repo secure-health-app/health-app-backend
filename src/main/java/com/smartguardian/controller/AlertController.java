@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.smartguardian.model.User;
 
 import java.time.Instant;
 import java.util.List;
@@ -84,7 +85,9 @@ public class AlertController {
             alert.setUserName(userDetails.getUsername());
             // look up the user's linked caregiver and assign the alert to them
             userRepository.findById(userDetails.getId()).ifPresent(user -> {
-                alert.setAssignedCaregiver(user.getCaregiverUsername());
+                if (user.getCaregiverUsername() != null) {
+                    alert.setAssignedCaregiver(user.getCaregiverUsername().toLowerCase());
+                }
             });
         }
 
@@ -149,9 +152,10 @@ public class AlertController {
         if (userDetails != null) {
             alert.setUserName(userDetails.getUsername());
             // route the alert to this user's linked caregiver
-            userRepository.findById(userDetails.getId()).ifPresent(user -> {
-                alert.setAssignedCaregiver(user.getCaregiverUsername());
-            });
+            userRepository.findById(userDetails.getId())
+                    .ifPresent(user -> alert.setAssignedCaregiver(
+                            user.getCaregiverUsername() != null ? user.getCaregiverUsername().toLowerCase() : null
+                    ));
         }
 
         fallAlertRepository.save(alert);
@@ -173,7 +177,7 @@ public class AlertController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String caregiverUsername = userDetails.getUsername();
+        String caregiverUsername = userDetails.getUsername().toLowerCase();
         List<FallAlert> confirmed = fallAlertRepository
                 .findByStatusAndAssignedCaregiverOrderByDetectedAtDesc("CONFIRMED", caregiverUsername);
 
@@ -182,6 +186,14 @@ public class AlertController {
         }
 
         FallAlert latest = confirmed.get(0);
+        String phone = userRepository.findByUsername(latest.getUserName())
+                .map(user -> user.getPhoneNumber())
+                .orElse("");
+
+        User user = userRepository.findByUsername(latest.getUserName()).orElse(null);
+
+        String name = user != null ? user.getName() : latest.getUserName();
+
         return ResponseEntity.ok(Map.of(
                 "active", true,
                 "alertId", latest.getId(),
@@ -190,19 +202,34 @@ public class AlertController {
                 "peakAcceleration", latest.getPeakAcceleration() != null ? latest.getPeakAcceleration() : 0.0,
                 "latitude", latest.getLatitude() != null ? latest.getLatitude() : "",
                 "longitude", latest.getLongitude() != null ? latest.getLongitude() : "",
-                "userName", latest.getUserName() != null ? latest.getUserName() : "User"
+                "userName", latest.getUserName(),
+                "name", name,
+                "phoneNumber", phone
         ));
     }
 
     // Caregiver tapped a response button - marks alert as resolved
     @PostMapping("/caregiver/{id}/resolve")
-    public ResponseEntity<?> resolveAlert(@PathVariable Long id) {
+    public ResponseEntity<?> resolveAlert(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload) {
         return fallAlertRepository.findById(id).map(alert -> {
-            alert.setStatus("RESOLVED");
+
+            String action = payload.get("action");
+
+            if ("onway".equals(action)) {
+                alert.setStatus("CAREGIVER_ON_THE_WAY");
+            }
+            else if ("emergency".equals(action)) {
+                alert.setStatus("EMERGENCY_SERVICES_CALLED");
+            }
+
             alert.setAcknowledged(true);
             fallAlertRepository.save(alert);
-            System.out.println("[ALERT] Alert " + id + " resolved by caregiver");
-            return ResponseEntity.ok(Map.of("message", "Alert resolved"));
+
+            System.out.println("[ALERT] Alert " + id + " responded: " + alert.getStatus());
+
+            return ResponseEntity.ok(Map.of("message", "Alert response recorded"));
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -215,20 +242,26 @@ public class AlertController {
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         String caregiverUsername = payload.get("caregiverUsername");
-        if (caregiverUsername == null || caregiverUsername.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Caregiver username is required"));
+        String phoneNumber = payload.get("phoneNumber");
+
+        if (caregiverUsername == null || caregiverUsername.trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Caregiver username is required"));
         }
 
+        final String caregiver= caregiverUsername.toLowerCase();
+
         // check the caregiver account actually exists before saving
-        if (!userRepository.existsByUsername(caregiverUsername)) {
+        if (!userRepository.existsByUsername(caregiver)) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "No account found with that username"));
         }
 
         return userRepository.findById(userDetails.getId()).map(user -> {
-            user.setCaregiverUsername(caregiverUsername);
+            user.setCaregiverUsername(caregiver);
+            user.setPhoneNumber(phoneNumber);
             userRepository.save(user);
-            System.out.println("[LINK] " + user.getUsername() + " linked to caregiver: " + caregiverUsername);
+            System.out.println("[LINK] " + user.getUsername() + " linked to caregiver: " + caregiver);
             return ResponseEntity.ok(Map.of("message", "Caregiver linked successfully"));
         }).orElse(ResponseEntity.notFound().build());
     }
@@ -247,6 +280,20 @@ public class AlertController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/profile/phone")
+    public ResponseEntity<?> updatePhone(
+            @RequestBody Map<String, String> payload,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        String phone = payload.get("phoneNumber");
+
+        return userRepository.findById(userDetails.getId()).map(user -> {
+            user.setPhoneNumber(phone);
+            userRepository.save(user);
+            return ResponseEntity.ok(Map.of("message", "Phone updated"));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/fall")
     public ResponseEntity<List<FallAlert>> getUnacknowledgedAlerts() {
         return ResponseEntity.ok(fallAlertRepository.findByAcknowledgedFalse());
@@ -259,5 +306,29 @@ public class AlertController {
             fallAlertRepository.save(alert);
             return ResponseEntity.ok(Map.of("message", "Alert acknowledged"));
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/user/latest")
+    public ResponseEntity<?> getLatestUserAlert(
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<FallAlert> alerts = fallAlertRepository
+                .findByUserNameOrderByDetectedAtDesc(userDetails.getUsername());
+
+        if (alerts.isEmpty()) {
+            return ResponseEntity.ok(Map.of("active", false));
+        }
+
+        FallAlert latest = alerts.get(0);
+
+        return ResponseEntity.ok(Map.of(
+                "active", true,
+                "status", latest.getStatus(),
+                "detectedAt", latest.getDetectedAt()
+        ));
     }
 }

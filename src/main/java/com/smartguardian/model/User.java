@@ -35,6 +35,12 @@ public class User {
     @Size(max = 120)
     private String password;
 
+    @NotBlank
+    @Size(max = 100)
+    private String name;
+
+    private String phoneNumber;
+
     // To persist fitbit tokens linked to the user
     @Column(length = 2048, nullable = true)
     private String fitbitAccessToken;

@@ -22,51 +22,55 @@ import com.smartguardian.security.services.UserDetailsImpl;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-  @Autowired
-  AuthenticationManager authenticationManager; // login
+    @Autowired
+    AuthenticationManager authenticationManager; // login
 
-  @Autowired
-  UserRepository userRepository; // saves/reads users from DB
+    @Autowired
+    UserRepository userRepository; // saves/reads users from DB
 
-  @Autowired
-  PasswordEncoder encoder; // hashes passwords
+    @Autowired
+    PasswordEncoder encoder; // hashes passwords
 
-  @Autowired
-  JwtUtils jwtUtils; // creates login tokens
+    @Autowired
+    JwtUtils jwtUtils; // creates login tokens
 
-  @PostMapping("/signin")
-  public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    @PostMapping("/signin")
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
-    Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-    String jwt = jwtUtils.generateJwtToken(authentication);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-    return ResponseEntity.ok(new JwtResponse(jwt,
-                         userDetails.getId(),
-                         userDetails.getUsername(),
-                         userDetails.getEmail()));
-  }
-
-  @PostMapping("/signup")
-  public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-
-    if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-      return ResponseEntity
-          .badRequest()
-          .body(new MessageResponse("Error: Email is already in use!"));
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail()));
     }
 
-    // Create new user's account
-    User user = new User(signUpRequest.getEmail(),
-               signUpRequest.getEmail(),
-               encoder.encode(signUpRequest.getPassword()));
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 
-    userRepository.save(user);
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
 
-    return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
-  }
+        // Create new user's account
+        User user = new User(
+                signUpRequest.getEmail(),
+                signUpRequest.getEmail(),
+                encoder.encode(signUpRequest.getPassword())
+        );
+
+        user.setPhoneNumber(signUpRequest.getPhoneNumber());
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
 }
