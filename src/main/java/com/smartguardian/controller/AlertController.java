@@ -328,7 +328,22 @@ public class AlertController {
         return ResponseEntity.ok(Map.of(
                 "active", true,
                 "status", latest.getStatus(),
-                "detectedAt", latest.getDetectedAt()
+                "detectedAt", latest.getDetectedAt(),
+                "seenByUser", latest.isSeenByUser(),
+                "alertId", latest.getId()
         ));
+    }
+
+    @PostMapping("/user/{id}/mark-seen")
+    public ResponseEntity<?> markAlertAsSeen(@PathVariable Long id) {
+        return fallAlertRepository.findById(id).map(alert -> {
+
+            alert.setSeenByUser(true);
+            fallAlertRepository.save(alert);
+
+            System.out.println("[ALERT] Alert " + id + " marked as seen by user");
+
+            return ResponseEntity.ok(Map.of("message", "Alert marked as seen"));
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

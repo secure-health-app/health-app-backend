@@ -28,6 +28,8 @@ public class FallAlert {
     // Which device sent the alert e.g. "raspberry-pi-sense-hat"
     private String deviceId;
 
+    private boolean seenByUser = false;
+
     // PENDING   = Pi detected fall, waiting for patient to respond
     // CONFIRMED = patient confirmed / SOS pressed or countdown expired - shows on caregiver view
     // CANCELLED = patient said false alarm
