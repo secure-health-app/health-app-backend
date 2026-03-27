@@ -1,9 +1,11 @@
 package com.smartguardian.security.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smartguardian.model.FitbitDailySummary;
 import com.smartguardian.model.User;
+import com.smartguardian.repository.FitbitDailySummaryRepository;
 import com.smartguardian.repository.UserRepository;
-import com.smartguardian.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
@@ -15,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Base64;
 import java.util.Map;
 
@@ -24,6 +27,7 @@ public class FitbitApiService {
     private static final String FITBIT_API_BASE = "https://api.fitbit.com/1/user/-/";
 
     private final UserRepository userRepository;
+    private final FitbitDailySummaryRepository summaryRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -33,79 +37,146 @@ public class FitbitApiService {
     @Value("${fitbit.client-secret}")
     private String clientSecret;
 
-    public FitbitApiService(UserRepository userRepository) {
+    public FitbitApiService(UserRepository userRepository,
+                            FitbitDailySummaryRepository summaryRepository) {
         this.userRepository = userRepository;
+        this.summaryRepository = summaryRepository;
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
     }
 
+
     /* ===================== PUBLIC API ===================== */
 
+    // Get heart rate for a specific date
     public String getHeartRateForDate(String date) {
-
         User user = getAuthenticatedUser();
+        if (isTokenExpired(user)) refreshAccessToken(user);
 
-        if (isTokenExpired(user)) {
-            refreshAccessToken(user);
-        }
-
-        String url = FITBIT_API_BASE +
-                "activities/heart/date/" + date + "/1d.json";
-
-        return performGetRequest(url, user);
+        return performGetRequest(
+                FITBIT_API_BASE + "activities/heart/date/" + date + "/1d.json",
+                user
+        );
     }
 
+    // Get steps for a specific date
     public String getStepsForDate(String date) {
-
         User user = getAuthenticatedUser();
+        if (isTokenExpired(user)) refreshAccessToken(user);
 
-        if (isTokenExpired(user)) {
-            refreshAccessToken(user);
-        }
-
-        String url = FITBIT_API_BASE +
-                "activities/date/" + date + ".json";
-
-        return performGetRequest(url, user);
+        return performGetRequest(
+                FITBIT_API_BASE + "activities/date/" + date + ".json",
+                user
+        );
     }
 
+    // Get sleep data for a specific date
     public String getSleepForDate(String date) {
+        User user = getAuthenticatedUser();
+        if (isTokenExpired(user)) refreshAccessToken(user);
+
+        return performGetRequest(
+                FITBIT_API_BASE + "sleep/date/" + date + ".json",
+                user
+        );
+    }
+
+
+    /* ===================== FETCH AND SAVE ===================== */
+
+    // Fetch Fitbit data and store it in database
+    public FitbitDailySummary fetchAndSaveDailySummary(String date) {
 
         User user = getAuthenticatedUser();
+        if (isTokenExpired(user)) refreshAccessToken(user);
 
-        if (isTokenExpired(user)) {
-            refreshAccessToken(user);
+        LocalDate localDate = LocalDate.parse(date);
+
+        // If already saved for this date, return existing record
+        return summaryRepository.findByUserAndDate(user, localDate)
+                .orElseGet(() -> {
+
+                    Integer restingHR = parseRestingHeartRate(getHeartRateForDate(date));
+                    Integer steps = parseSteps(getStepsForDate(date));
+                    Integer sleepMins = parseSleepMinutes(getSleepForDate(date));
+
+                    FitbitDailySummary summary = FitbitDailySummary.builder()
+                            .user(user)
+                            .date(localDate)
+                            .restingHeartRate(restingHR)
+                            .steps(steps)
+                            .sleepMinutes(sleepMins)
+                            .build();
+
+                    return summaryRepository.save(summary);
+                });
+    }
+
+
+    /* ===================== PARSERS ===================== */
+
+    // Extract resting HR from Fitbit JSON
+    private Integer parseRestingHeartRate(String json) {
+        try {
+            JsonNode root = objectMapper.readTree(json);
+
+            JsonNode value = root
+                    .path("activities-heart")
+                    .get(0)
+                    .path("value")
+                    .path("restingHeartRate");
+
+            return value.isMissingNode() ? null : value.asInt();
+
+        } catch (Exception e) {
+            return null;
         }
+    }
 
-        String url = FITBIT_API_BASE +
-                "sleep/date/" + date + ".json";
+    // Extract steps from Fitbit JSON
+    private Integer parseSteps(String json) {
+        try {
+            JsonNode root = objectMapper.readTree(json);
+            return root.path("summary").path("steps").asInt();
 
-        return performGetRequest(url, user);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Extract sleep minutes from Fitbit JSON
+    private Integer parseSleepMinutes(String json) {
+        try {
+            JsonNode root = objectMapper.readTree(json);
+            return root.path("summary").path("totalMinutesAsleep").asInt();
+
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 
     /* ===================== CORE LOGIC ===================== */
 
+    // Check if Fitbit token expired
     private boolean isTokenExpired(User user) {
-        return user.getFitbitTokenExpiry() == null ||
-                Instant.now().isAfter(user.getFitbitTokenExpiry());
+        return user.getFitbitTokenExpiry() == null
+                || Instant.now().isAfter(user.getFitbitTokenExpiry());
     }
 
+    // Generic GET request to Fitbit API
     private String performGetRequest(String url, User user) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(user.getFitbitAccessToken());
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response =
-                restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        entity,
-                        String.class
-                );
+        ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                String.class
+        );
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new RuntimeException("Fitbit API request failed");
@@ -114,35 +185,33 @@ public class FitbitApiService {
         return response.getBody();
     }
 
+
     /* ===================== TOKEN REFRESH ===================== */
 
+    // Refresh expired Fitbit token
     private void refreshAccessToken(User user) {
-
-        String tokenUrl = "https://api.fitbit.com/oauth2/token";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
         headers.set(
                 HttpHeaders.AUTHORIZATION,
-                "Basic " + Base64.getEncoder().encodeToString(
-                        (clientId + ":" + clientSecret)
-                                .getBytes(StandardCharsets.UTF_8)
-                )
+                "Basic " + Base64.getEncoder()
+                        .encodeToString(
+                                (clientId + ":" + clientSecret)
+                                        .getBytes(StandardCharsets.UTF_8)
+                        )
         );
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "refresh_token");
         body.add("refresh_token", user.getFitbitRefreshToken());
 
-        HttpEntity<MultiValueMap<String, String>> request =
-                new HttpEntity<>(body, headers);
-
-        ResponseEntity<String> response =
-                restTemplate.postForEntity(
-                        tokenUrl,
-                        request,
-                        String.class
-                );
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "https://api.fitbit.com/oauth2/token",
+                new HttpEntity<>(body, headers),
+                String.class
+        );
 
         if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
             throw new RuntimeException("Failed to refresh Fitbit token");
@@ -151,14 +220,15 @@ public class FitbitApiService {
         updateTokens(response.getBody(), user);
     }
 
+    // Update stored tokens after refresh
     private void updateTokens(String responseBody, User user) {
-
         try {
             Map<String, Object> tokenData =
                     objectMapper.readValue(responseBody, Map.class);
 
             user.setFitbitAccessToken((String) tokenData.get("access_token"));
             user.setFitbitRefreshToken((String) tokenData.get("refresh_token"));
+
             user.setFitbitTokenExpiry(
                     Instant.now().plusSeconds(
                             ((Number) tokenData.get("expires_in")).longValue()
@@ -172,8 +242,10 @@ public class FitbitApiService {
         }
     }
 
+
     /* ===================== AUTH ===================== */
 
+    // Get logged in user from security context
     private User getAuthenticatedUser() {
 
         Authentication auth =
