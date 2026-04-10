@@ -48,7 +48,6 @@ public class User {
 
     /* ===================== PROFILE ===================== */
 
-    @NotBlank
     @Size(max = 100)
     private String name;
 

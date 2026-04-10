@@ -101,6 +101,8 @@ public class AuthController {
                 encoder.encode(signUpRequest.getPassword())
         );
 
+        // optional name
+        user.setName(signUpRequest.getEmail());
         // optional phone number
         user.setPhoneNumber(signUpRequest.getPhoneNumber());
 
