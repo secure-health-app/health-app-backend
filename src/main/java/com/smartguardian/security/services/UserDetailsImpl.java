@@ -2,10 +2,14 @@ package com.smartguardian.security.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.smartguardian.model.User;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+
+
+/* ===================== USER DETAILS ===================== */
 
 public class UserDetailsImpl implements UserDetails {
 
@@ -16,7 +20,12 @@ public class UserDetailsImpl implements UserDetails {
     @JsonIgnore
     private String password;
 
-    public UserDetailsImpl(Long id, String username, String email, String password) {
+    public UserDetailsImpl(
+            Long id,
+            String username,
+            String email,
+            String password
+    ) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -25,10 +34,10 @@ public class UserDetailsImpl implements UserDetails {
 
     public static UserDetailsImpl build(User user) {
         return new UserDetailsImpl(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            user.getPassword()
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getPassword()
         );
     }
 

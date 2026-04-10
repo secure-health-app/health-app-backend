@@ -8,7 +8,10 @@ import java.util.List;
 @Data
 @Builder
 public class AnomalyResult {
+
     private boolean anomalyDetected;
+
     private String message;
+
     private List<String> flags;
 }

@@ -6,19 +6,24 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
+
+/* ===================== FITBIT DATA CONTROLLER ===================== */
+
 @RestController
 @RequestMapping("/api/fitbit")
 public class FitbitDataController {
 
+    // Service
     private final FitbitApiService fitbitApiService;
 
     public FitbitDataController(FitbitApiService fitbitApiService) {
         this.fitbitApiService = fitbitApiService;
     }
 
-    /**
-     * Returns the authenticated user's heart rate data for today.
-     */
+
+    /* ===================== HEART RATE ===================== */
+
+    // get today's heart rate
     @GetMapping("/heart-rate")
     public ResponseEntity<?> getTodayHeartRate() {
 
@@ -30,9 +35,7 @@ public class FitbitDataController {
         return ResponseEntity.ok(heartRateData);
     }
 
-    /**
-     * Returns heart rate data for a specific date (YYYY-MM-DD).
-     */
+    // get heart rate for specific date
     @GetMapping("/heart-rate/{date}")
     public ResponseEntity<?> getHeartRateForDate(
             @PathVariable String date
@@ -43,6 +46,10 @@ public class FitbitDataController {
         return ResponseEntity.ok(heartRateData);
     }
 
+
+    /* ===================== STEPS ===================== */
+
+    // get steps (today by default)
     @GetMapping("/steps")
     public ResponseEntity<?> getSteps(
             @RequestParam(defaultValue = "today") String date) {
@@ -56,6 +63,10 @@ public class FitbitDataController {
         );
     }
 
+
+    /* ===================== SLEEP ===================== */
+
+    // get sleep data (today by default)
     @GetMapping("/sleep")
     public ResponseEntity<?> getSleep(
             @RequestParam(defaultValue = "today") String date) {
@@ -68,7 +79,6 @@ public class FitbitDataController {
                 fitbitApiService.getSleepForDate(date)
         );
     }
-
 
 
 }

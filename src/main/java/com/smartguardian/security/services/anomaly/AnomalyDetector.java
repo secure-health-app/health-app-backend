@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/* ===================== ANOMALY DETECTOR ===================== */
+
 @Component
 public class AnomalyDetector {
 
@@ -15,10 +18,14 @@ public class AnomalyDetector {
     // Minimum days of data needed before anomaly detection is meaningful
     private static final int MIN_RECORDS = 7;
 
-    public AnomalyResult detect(FitbitDailySummary today, Baseline baseline) {
+    public AnomalyResult detect(
+            FitbitDailySummary today,
+            Baseline baseline
+    ) {
 
         List<String> flags = new ArrayList<>();
 
+        // baseline check
         if (baseline.getRecordCount() < MIN_RECORDS) {
             return AnomalyResult.builder()
                     .anomalyDetected(false)
@@ -28,38 +35,71 @@ public class AnomalyDetector {
                     .build();
         }
 
-        // Heart rate — spike above baseline is the concern
+
+        /* ===================== HEART RATE ===================== */
+
+        // spike above baseline is the concern
         if (today.getRestingHeartRate() != null && baseline.getHeartRateStdDev() > 0) {
-            double hrZ = (today.getRestingHeartRate() - baseline.getHeartRateMean())
+            double hrZ = (today.getRestingHeartRate()
+                    - baseline.getHeartRateMean())
                     / baseline.getHeartRateStdDev();
             if (hrZ > THRESHOLD) {
-                flags.add(String.format(
-                        "Resting heart rate (%d BPM) is significantly above normal (mean: %.1f BPM)",
-                        today.getRestingHeartRate(), baseline.getHeartRateMean()));
+
+                flags.add
+                        (String.format(
+                                "Resting heart rate (%d BPM) is significantly above normal (mean: %.1f BPM)",
+                                today.getRestingHeartRate(),
+                                baseline.getHeartRateMean()
+                                )
+                        );
             }
         }
 
-        // Steps — drop below baseline is the concern
+
+        /* ===================== STEPS ===================== */
+
+        // drop below baseline is the concern
         if (today.getSteps() != null && baseline.getStepsStdDev() > 0) {
-            double stepsZ = (today.getSteps() - baseline.getStepsMean())
-                    / baseline.getStepsStdDev();
+
+            double stepsZ =
+                    (today.getSteps()
+                            - baseline.getStepsMean())
+                            / baseline.getStepsStdDev();
+
             if (stepsZ < -THRESHOLD) {
-                flags.add(String.format(
-                        "Daily steps (%d) are significantly below normal (mean: %.0f steps)",
-                        today.getSteps(), baseline.getStepsMean()));
+                flags.add(
+                        String.format(
+                                "Daily steps (%d) are significantly below normal (mean: %.0f steps)",
+                                today.getSteps(),
+                                baseline.getStepsMean()
+                        )
+                );
             }
         }
 
-        // Sleep — drop below baseline is the concern
+
+        /* ===================== SLEEP ===================== */
+
+        // drop below baseline is the concern
         if (today.getSleepMinutes() != null && baseline.getSleepStdDev() > 0) {
-            double sleepZ = (today.getSleepMinutes() - baseline.getSleepMean())
+
+            double sleepZ = (today.getSleepMinutes()
+                    - baseline.getSleepMean())
                     / baseline.getSleepStdDev();
+
             if (sleepZ < -THRESHOLD) {
-                flags.add(String.format(
-                        "Sleep (%d mins) is significantly below normal (mean: %.0f mins)",
-                        today.getSleepMinutes(), baseline.getSleepMean()));
+                flags.add(
+                        String.format(
+                                "Sleep (%d mins) is significantly below normal (mean: %.0f mins)",
+                                today.getSleepMinutes(),
+                                baseline.getSleepMean()
+                        )
+                );
             }
         }
+
+
+        /* ===================== RESULT ===================== */
 
         return AnomalyResult.builder()
                 .anomalyDetected(!flags.isEmpty())

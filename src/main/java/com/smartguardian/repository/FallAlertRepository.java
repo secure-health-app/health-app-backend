@@ -6,17 +6,33 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+
+/* ===================== FALL ALERT REPOSITORY ===================== */
+
 @Repository
 public interface FallAlertRepository extends JpaRepository<FallAlert, Long> {
 
-    // Fetch all unacknowledged alerts - used by the dashboard
+
+    /* ===================== DASHBOARD ===================== */
+
+    // fetch all unacknowledged alerts
     List<FallAlert> findByAcknowledgedFalse();
+
+
+    /* ===================== STATUS ===================== */
 
     // Find alerts by status, newest first
     List<FallAlert> findByStatusOrderByDetectedAtDesc(String status);
 
-    // used by the caregiver endpoint - only returns alerts assigned to this caregiver
+
+    /* ===================== CAREGIVER ===================== */
+
+    // alerts assigned to a specific caregiver
     List<FallAlert> findByStatusAndAssignedCaregiverOrderByDetectedAtDesc(String status, String assignedCaregiver);
 
+
+    /* ===================== USER ===================== */
+
+    // alerts for a specific user
     List<FallAlert> findByUserNameOrderByDetectedAtDesc(String userName);
 }

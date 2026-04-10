@@ -6,29 +6,45 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
+
+/* ===================== FALL ALERT ENTITY ===================== */
+
 @Entity
 @Table(name = "fall_alerts")
 @Data
 @NoArgsConstructor
 public class FallAlert {
 
+
+    /* ===================== PRIMARY KEY ===================== */
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // When the fall was detected on the Pi
+
+    /* ===================== DETECTION DATA ===================== */
+
+    // when the fall was detected on the Pi
     private Instant detectedAt;
 
-    // Peak acceleration magnitude that triggered the alert (in g)
+    // peak acceleration magnitude that triggered the alert (in g)
     private Double peakAcceleration;
 
-    // Detection phase that confirmed the fall e.g. "IMPACT", "STILLNESS"
+    // detection phase that confirmed the fall e.g. IMPACT/STILLNESS
     private String detectionPhase;
 
-    // Which device sent the alert e.g. "raspberry-pi-sense-hat"
+    // device that sent the alert e.g. "raspberry-pi-sense-hat"
     private String deviceId;
 
+
+    /* ===================== USER FLAGS ===================== */
+
+    // whether the user has seen this alert
     private boolean seenByUser = false;
+
+
+    /* ===================== STATUS ===================== */
 
     // PENDING   = Pi detected fall, waiting for patient to respond
     // CONFIRMED = patient confirmed / SOS pressed or countdown expired - shows on caregiver view
@@ -36,6 +52,9 @@ public class FallAlert {
     // RESOLVED  = caregiver acknowledged and responded
     @Column(nullable = false)
     private String status = "PENDING";
+
+
+    /* ===================== CAREGIVER FLAGS ===================== */
 
     // Acknowledged by caregiver in the dashboard
     private boolean acknowledged = false;
@@ -51,7 +70,12 @@ public class FallAlert {
     // copied from user.caregiverUsername at the time the alert is confirmed
     private String assignedCaregiver;
 
-    public FallAlert(Instant detectedAt, Double peakAcceleration, String detectionPhase, String deviceId) {
+    public FallAlert(
+            Instant detectedAt,
+            Double peakAcceleration,
+            String detectionPhase,
+            String deviceId) {
+
         this.detectedAt = detectedAt;
         this.peakAcceleration = peakAcceleration;
         this.detectionPhase = detectionPhase;

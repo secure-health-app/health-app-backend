@@ -1,24 +1,25 @@
 package com.smartguardian.controller;
 
 import com.smartguardian.security.services.FitbitAuthService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+
+/* ===================== FITBIT AUTH CONTROLLER ===================== */
+
 @RestController
 @RequestMapping("/api/auth/fitbit")
 public class FitbitAuthController {
 
+    // Service
     private final FitbitAuthService fitbitAuthService;
 
+    // Config
     @Value("${fitbit.client-id}")
     private String clientId;
 
@@ -29,9 +30,10 @@ public class FitbitAuthController {
         this.fitbitAuthService = fitbitAuthService;
     }
 
-    /**
-     * Step 1: Redirects the authenticated user to Fitbit OAuth login.
-     */
+
+    /* ===================== CONNECT ===================== */
+
+    // Step 1: Redirect user to Fitbit OAuth login
     @GetMapping("/connect")
     public void connectToFitbit(
             @RequestParam String token,
@@ -51,10 +53,10 @@ public class FitbitAuthController {
         response.sendRedirect(authUrl);
     }
 
-    /**
-     * Step 2: Fitbit redirects here with an authorization code.
-     * The code is exchanged for tokens in the service layer.
-     */
+
+    /* ===================== CALLBACK ===================== */
+
+    // Step 2: Fitbit redirects back with auth code
     @GetMapping("/callback")
     public void fitbitCallback(
             String code,
@@ -62,8 +64,10 @@ public class FitbitAuthController {
             HttpServletResponse response
     ) throws IOException {
 
+        // exchange code for tokens
         fitbitAuthService.exchangeCodeAndSaveTokens(code, state);
 
+        // redirect back to frontend
         response.sendRedirect(
                 "http://localhost:5173/dashboard?fitbit=connected"
         );

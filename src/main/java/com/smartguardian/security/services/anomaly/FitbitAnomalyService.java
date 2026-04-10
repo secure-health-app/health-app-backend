@@ -6,11 +6,15 @@ import com.smartguardian.repository.FitbitDailySummaryRepository;
 import com.smartguardian.repository.UserRepository;
 import com.smartguardian.security.services.FitbitApiService;
 import com.smartguardian.security.services.UserDetailsImpl;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+
+
+/* ===================== FITBIT ANOMALY SERVICE ===================== */
 
 @Service
 public class FitbitAnomalyService {
@@ -21,11 +25,13 @@ public class FitbitAnomalyService {
     private final BaselineCalculator baselineCalculator;
     private final AnomalyDetector anomalyDetector;
 
-    public FitbitAnomalyService(FitbitApiService fitbitApiService,
-                                FitbitDailySummaryRepository summaryRepository,
-                                UserRepository userRepository,
-                                BaselineCalculator baselineCalculator,
-                                AnomalyDetector anomalyDetector) {
+    public FitbitAnomalyService(
+            FitbitApiService fitbitApiService,
+            FitbitDailySummaryRepository summaryRepository,
+            UserRepository userRepository,
+            BaselineCalculator baselineCalculator,
+            AnomalyDetector anomalyDetector
+    ) {
         this.fitbitApiService = fitbitApiService;
         this.summaryRepository = summaryRepository;
         this.userRepository = userRepository;
@@ -33,35 +39,63 @@ public class FitbitAnomalyService {
         this.anomalyDetector = anomalyDetector;
     }
 
+
+    /* ===================== CHECK TODAY ===================== */
+
     public AnomalyResult checkTodaysAnomalies() {
+
         User user = getAuthenticatedUser();
+
         String today = LocalDate.now().toString();
 
-        // Fetch today's data from Fitbit and save to DB
-        FitbitDailySummary todaySummary = fitbitApiService.fetchAndSaveDailySummary(today);
+        // fetch today's data from Fitbit and save to DB
+        FitbitDailySummary todaySummary =
+                fitbitApiService.fetchAndSaveDailySummary(today);
 
-        // Calculate baseline from last 30 days
-        Baseline baseline = baselineCalculator.calculate(user);
+        // calculate baseline from previous data
+        Baseline baseline =
+                baselineCalculator.calculate(user);
 
-        // Detect anomalies
+        // run anomaly detection
         return anomalyDetector.detect(todaySummary, baseline);
     }
 
+
+    /* ===================== AUTH USER ===================== */
+
     private User getAuthenticatedUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
-        return userRepository.findById(userDetails.getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Authentication auth =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        UserDetailsImpl userDetails =
+                (UserDetailsImpl) auth.getPrincipal();
+
+        return userRepository
+                .findById(userDetails.getId())
+                .orElseThrow(() ->
+                        new RuntimeException("User not found")
+                );
     }
 
+
+    /* ===================== BACKFILL ===================== */
+
     public void backfillLastNDays(int days) {
+
         for (int i = days; i >= 1; i--) {
-            String date = LocalDate.now().minusDays(i).toString();
+            String date =
+                    LocalDate.now().minusDays(i).toString();
+
             try {
                 fitbitApiService.fetchAndSaveDailySummary(date);
                 System.out.println("[Backfill] Saved: " + date);
             } catch (Exception e) {
-                System.out.println("[Backfill] Skipped " + date + ": " + e.getMessage());
+                System.out.println("[Backfill] Skipped "
+                        + date
+                        + ": "
+                        + e.getMessage()
+                );
             }
         }
     }

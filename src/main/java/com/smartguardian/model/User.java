@@ -9,18 +9,28 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
+
+/* ===================== USER ENTITY ===================== */
+
 @Entity
 @Table(name = "users",
-       uniqueConstraints = {
-           @UniqueConstraint(columnNames = "username"),
-           @UniqueConstraint(columnNames = "email")
-       })
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "username"),
+                @UniqueConstraint(columnNames = "email")
+        })
 @Data
 @NoArgsConstructor
 public class User {
+
+
+    /* ===================== PRIMARY KEY ===================== */
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+
+    /* ===================== LOGIN FIELDS ===================== */
 
     @NotBlank
     @Size(max = 50)
@@ -35,26 +45,33 @@ public class User {
     @Size(max = 120)
     private String password;
 
+
+    /* ===================== PROFILE ===================== */
+
     @NotBlank
     @Size(max = 100)
     private String name;
 
     private String phoneNumber;
 
-    // To persist fitbit tokens linked to the user
+
+    /* ===================== FITBIT TOKENS ===================== */
+
+    // Fitbit access token
     @Column(length = 2048, nullable = true)
     private String fitbitAccessToken;
 
+    // Fitbit refresh token
     @Column(length = 2048)
     private String fitbitRefreshToken;
 
+    // expiry time for access token
     private Instant fitbitTokenExpiry;
 
+    // Fitbit user id
     private String fitbitUserId;
 
     // the username of the caregiver who monitors this user
-    // set by the user in their profile settings
-    // used to route alerts to the right caregiver
     @Column(nullable = true)
     private String caregiverUsername;
 
