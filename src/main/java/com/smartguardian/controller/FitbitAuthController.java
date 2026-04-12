@@ -26,6 +26,9 @@ public class FitbitAuthController {
     @Value("${fitbit.redirect-uri}")
     private String redirectUri;
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     public FitbitAuthController(FitbitAuthService fitbitAuthService) {
         this.fitbitAuthService = fitbitAuthService;
     }
@@ -69,7 +72,7 @@ public class FitbitAuthController {
 
         // redirect back to frontend
         response.sendRedirect(
-                "http://localhost:5173/dashboard?fitbit=connected"
+                frontendUrl + "/dashboard?fitbit=connected"
         );
     }
 }
