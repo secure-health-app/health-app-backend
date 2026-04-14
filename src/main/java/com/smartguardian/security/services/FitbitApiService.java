@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -61,6 +62,8 @@ public class FitbitApiService {
 
         User user = getAuthenticatedUser();
 
+        ensureFitbitConnected(user);
+
         if (isTokenExpired(user))
             refreshAccessToken(user);
 
@@ -75,6 +78,8 @@ public class FitbitApiService {
 
         User user = getAuthenticatedUser();
 
+        ensureFitbitConnected(user);
+
         if (isTokenExpired(user))
             refreshAccessToken(user);
 
@@ -88,6 +93,8 @@ public class FitbitApiService {
     public String getSleepForDate(String date) {
 
         User user = getAuthenticatedUser();
+
+        ensureFitbitConnected(user);
 
         if (isTokenExpired(user))
             refreshAccessToken(user);
@@ -105,6 +112,8 @@ public class FitbitApiService {
     public FitbitDailySummary fetchAndSaveDailySummary(String date) {
 
         User user = getAuthenticatedUser();
+        ensureFitbitConnected(user);
+
         if (isTokenExpired(user))
             refreshAccessToken(user);
 
@@ -325,5 +334,12 @@ public class FitbitApiService {
                 .orElseThrow(() ->
                         new RuntimeException("User not found")
                 );
+    }
+
+    private void ensureFitbitConnected(User user) {
+        if (user.getFitbitAccessToken() == null || user.getFitbitAccessToken().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fitbit not connected");
+        }
+    }
     }
 }
