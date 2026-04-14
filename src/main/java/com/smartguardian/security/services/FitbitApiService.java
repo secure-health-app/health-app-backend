@@ -341,5 +341,4 @@ public class FitbitApiService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fitbit not connected");
         }
     }
-    }
 }
