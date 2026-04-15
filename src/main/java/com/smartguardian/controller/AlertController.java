@@ -377,7 +377,7 @@ public class AlertController {
         final String caregiver = caregiverUsername.toLowerCase();
 
         // check caregiver exists
-        if (!userRepository.existsByUsername(caregiver)) {
+        if (!userRepository.existsByEmail(caregiver)) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "No account found with that username"));
         }
