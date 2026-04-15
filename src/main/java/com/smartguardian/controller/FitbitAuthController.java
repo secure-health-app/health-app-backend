@@ -72,7 +72,7 @@ public class FitbitAuthController {
 
         // redirect back to frontend
         response.sendRedirect(
-                frontendUrl + "/dashboard?fitbit=connected"
+                frontendUrl + "/?fitbit=connected"
         );
     }
 }
