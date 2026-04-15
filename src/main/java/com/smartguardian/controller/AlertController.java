@@ -360,6 +360,23 @@ public class AlertController {
 
     /* ===================== PROFILE SETTINGS ===================== */
 
+    // get currently linked caregiver
+    @GetMapping("/caregiver-link")
+    public ResponseEntity<?> getCaregiverLink(
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        return userRepository.findById(userDetails.getId()).map(user -> {
+            if (user.getCaregiverUsername() != null) {
+                return ResponseEntity.ok(Map.of(
+                        "linked", true,
+                        "caregiverUsername", user.getCaregiverUsername()
+                ));
+            } else {
+                return ResponseEntity.ok(Map.of("linked", false));
+            }
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     // link caregiver username
     @PutMapping("/caregiver-link")
     public ResponseEntity<?> updateCaregiverLink(
