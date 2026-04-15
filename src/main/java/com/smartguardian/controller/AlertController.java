@@ -402,4 +402,52 @@ public class AlertController {
 
         }).orElse(ResponseEntity.notFound().build());
     }
+
+    /* ===================== USER ALERT STATUS ===================== */
+
+    @GetMapping("/user/latest")
+    public ResponseEntity<?> getLatestUserAlert(
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        if (userDetails == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        String username = userDetails.getUsername().toLowerCase();
+
+        List<FallAlert> active = fallAlertRepository
+                .findByUserNameAndStatusInOrderByDetectedAtDesc(
+                        username,
+                        List.of("CONFIRMED", "CAREGIVER_ON_THE_WAY", "EMERGENCY_SERVICES_CALLED")
+                );
+
+        if (active.isEmpty())
+            return ResponseEntity.ok(Map.of("active", false));
+
+        FallAlert latest = active.get(0);
+
+        return ResponseEntity.ok(Map.of(
+                "active", true,
+                "alertId", latest.getId(),
+                "status", latest.getStatus(),
+                "seenByUser", latest.isSeenByUser()
+        ));
+    }
+
+    /* ===================== USER MARK SEEN ===================== */
+
+    @PostMapping("/user/{id}/mark-seen")
+    public ResponseEntity<?> markAlertSeenByUser(@PathVariable Long id) {
+
+        return fallAlertRepository.findById(id).map(alert -> {
+
+            alert.setSeenByUser(true);
+
+            fallAlertRepository.save(alert);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Marked as seen")
+            );
+
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }

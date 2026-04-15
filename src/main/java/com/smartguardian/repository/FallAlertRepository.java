@@ -33,6 +33,12 @@ public interface FallAlertRepository extends JpaRepository<FallAlert, Long> {
 
     /* ===================== USER ===================== */
 
-    // alerts for a specific user
+    // alerts for a specific user (newest first)
     List<FallAlert> findByUserNameOrderByDetectedAtDesc(String userName);
+
+    // alerts for a user filtered by multiple statuses
+    List<FallAlert> findByUserNameAndStatusInOrderByDetectedAtDesc(
+            String userName,
+            List<String> statuses
+    );
 }

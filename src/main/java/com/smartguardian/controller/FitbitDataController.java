@@ -17,7 +17,23 @@ public class FitbitDataController {
     private final FitbitApiService fitbitApiService;
 
     public FitbitDataController(FitbitApiService fitbitApiService) {
+
         this.fitbitApiService = fitbitApiService;
+    }
+
+
+    /* ===================== DASHBOARD ===================== */
+
+    // get combined dashboard data
+    @GetMapping("/dashboard")
+    public ResponseEntity<?> getDashboard() {
+
+        String today =
+                LocalDate.now().toString();
+
+        return ResponseEntity.ok(
+                fitbitApiService.fetchAndSaveDailySummary(today)
+        );
     }
 
 
@@ -27,7 +43,8 @@ public class FitbitDataController {
     @GetMapping("/heart-rate")
     public ResponseEntity<?> getTodayHeartRate() {
 
-        String today = LocalDate.now().toString();
+        String today =
+                LocalDate.now().toString();
 
         String heartRateData =
                 fitbitApiService.getHeartRateForDate(today);
