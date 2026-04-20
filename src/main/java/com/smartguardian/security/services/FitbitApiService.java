@@ -119,31 +119,28 @@ public class FitbitApiService {
 
         LocalDate localDate = LocalDate.parse(date);
 
-        // if already saved for this date, return existing record
-        return summaryRepository
+        Integer restingHR =
+                parseRestingHeartRate(getHeartRateForDate(date));
+
+        Integer steps =
+                parseSteps(getStepsForDate(date));
+
+        Integer sleepMins =
+                parseSleepMinutes(getSleepForDate(date));
+
+        FitbitDailySummary summary = summaryRepository
                 .findByUserAndDate(user, localDate)
-                .orElseGet(() -> {
+                .orElse(FitbitDailySummary.builder()
+                        .user(user)
+                        .date(localDate)
+                        .build());
 
-                    Integer restingHR =
-                            parseRestingHeartRate(getHeartRateForDate(date));
+        // always update with latest values
+        summary.setRestingHeartRate(restingHR);
+        summary.setSteps(steps);
+        summary.setSleepMinutes(sleepMins);
 
-                    Integer steps =
-                            parseSteps(getStepsForDate(date));
-
-                    Integer sleepMins =
-                            parseSleepMinutes(getSleepForDate(date));
-
-                    FitbitDailySummary summary =
-                            FitbitDailySummary.builder()
-                                    .user(user)
-                                    .date(localDate)
-                                    .restingHeartRate(restingHR)
-                                    .steps(steps)
-                                    .sleepMinutes(sleepMins)
-                                    .build();
-
-                    return summaryRepository.save(summary);
-                });
+        return summaryRepository.save(summary);
     }
 
 
