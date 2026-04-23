@@ -50,7 +50,7 @@ public class FitbitAnomalyService {
 
         // fetch today's data from Fitbit and save to DB
         FitbitDailySummary todaySummary =
-                fitbitApiService.fetchAndSaveDailySummary(today);
+                fitbitApiService.fetchAndSaveInternal(today);
 
         // calculate baseline from previous data
         Baseline baseline =

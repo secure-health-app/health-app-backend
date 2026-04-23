@@ -46,6 +46,9 @@ public class FitbitDailySummary {
     // total sleep minutes
     private Integer sleepMinutes;
 
+    // active minutes (fairly active + very active)
+    private Integer activeMinutes;
+
     // when this data was fetched from Fitbit
     @Column(updatable = false)
     private LocalDateTime fetchedAt = LocalDateTime.now();

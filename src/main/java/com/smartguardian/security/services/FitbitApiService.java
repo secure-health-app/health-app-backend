@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartguardian.model.FitbitDailySummary;
 import com.smartguardian.model.User;
+import com.smartguardian.payload.response.FitbitDailySummaryDTO;
 import com.smartguardian.repository.FitbitDailySummaryRepository;
 import com.smartguardian.repository.UserRepository;
 
@@ -61,7 +62,6 @@ public class FitbitApiService {
     public String getHeartRateForDate(String date) {
 
         User user = getAuthenticatedUser();
-
         ensureFitbitConnected(user);
 
         if (isTokenExpired(user))
@@ -77,7 +77,6 @@ public class FitbitApiService {
     public String getStepsForDate(String date) {
 
         User user = getAuthenticatedUser();
-
         ensureFitbitConnected(user);
 
         if (isTokenExpired(user))
@@ -93,7 +92,6 @@ public class FitbitApiService {
     public String getSleepForDate(String date) {
 
         User user = getAuthenticatedUser();
-
         ensureFitbitConnected(user);
 
         if (isTokenExpired(user))
@@ -108,8 +106,8 @@ public class FitbitApiService {
 
     /* ===================== FETCH AND SAVE ===================== */
 
-    // fetch Fitbit data and store it in database
-    public FitbitDailySummary fetchAndSaveDailySummary(String date) {
+    // internal method — returns entity for anomaly detection
+    public FitbitDailySummary fetchAndSaveInternal(String date) {
 
         User user = getAuthenticatedUser();
         ensureFitbitConnected(user);
@@ -119,14 +117,11 @@ public class FitbitApiService {
 
         LocalDate localDate = LocalDate.parse(date);
 
-        Integer restingHR =
-                parseRestingHeartRate(getHeartRateForDate(date));
-
-        Integer steps =
-                parseSteps(getStepsForDate(date));
-
-        Integer sleepMins =
-                parseSleepMinutes(getSleepForDate(date));
+        Integer restingHR = parseRestingHeartRate(getHeartRateForDate(date));
+        String activitiesData = getStepsForDate(date);
+        Integer steps = parseSteps(activitiesData);
+        Integer activeMinutes = parseActiveMinutes(activitiesData);
+        Integer sleepMins = parseSleepMinutes(getSleepForDate(date));
 
         FitbitDailySummary summary = summaryRepository
                 .findByUserAndDate(user, localDate)
@@ -135,14 +130,27 @@ public class FitbitApiService {
                         .date(localDate)
                         .build());
 
-        // always update with latest values
         summary.setRestingHeartRate(restingHR);
         summary.setSteps(steps);
         summary.setSleepMinutes(sleepMins);
+        summary.setActiveMinutes(activeMinutes);
 
         return summaryRepository.save(summary);
     }
 
+    // public method — returns DTO for controller (never exposes User entity)
+    public FitbitDailySummaryDTO fetchAndSaveDailySummary(String date) {
+        FitbitDailySummary saved = fetchAndSaveInternal(date);
+
+        FitbitDailySummaryDTO dto = new FitbitDailySummaryDTO();
+        dto.setId(saved.getId());
+        dto.setDate(saved.getDate());
+        dto.setRestingHeartRate(saved.getRestingHeartRate());
+        dto.setSteps(saved.getSteps());
+        dto.setSleepMinutes(saved.getSleepMinutes());
+        dto.setActiveMinutes(saved.getActiveMinutes());
+        return dto;
+    }
 
     /* ===================== PARSERS ===================== */
 
@@ -181,6 +189,27 @@ public class FitbitApiService {
                     .path("summary")
                     .path("steps")
                     .asInt();
+
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // extract active minutes (fairly active + very active) from Fitbit JSON
+    private Integer parseActiveMinutes(String json) {
+
+        try {
+            JsonNode root =
+                    objectMapper.readTree(json);
+            JsonNode summary =
+                    root.path("summary");
+
+            int fairly =
+                    summary.path("fairlyActiveMinutes").asInt(0);
+            int very =
+                    summary.path("veryActiveMinutes").asInt(0);
+
+            return fairly + very;
 
         } catch (Exception e) {
             return null;

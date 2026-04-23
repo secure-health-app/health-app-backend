@@ -1,0 +1,14 @@
+package com.smartguardian.payload.response;
+
+import lombok.Data;
+import java.time.LocalDate;
+
+@Data
+public class FitbitDailySummaryDTO {
+    private Long id;
+    private LocalDate date;
+    private Integer restingHeartRate;
+    private Integer steps;
+    private Integer sleepMinutes;
+    private Integer activeMinutes;
+}
