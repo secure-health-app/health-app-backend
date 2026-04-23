@@ -2,23 +2,34 @@
 
 ## Overview
 
-This repository contains the Spring Boot backend API for the SmartGuardian system.  
-The backend handles authentication, fall alerts, Fitbit health data processing, and communication between the Raspberry Pi device and the frontend dashboard.
+This repository contains the Spring Boot backend API for **SmartGuardian**, a final-year software development project focused on fall detection, wearable health monitoring, and emergency alerting.
 
-The API securely stores health data, processes fall detection alerts, and provides endpoints for the SmartGuardian frontend.
+The backend acts as the central coordination layer between:
+
+- Raspberry Pi fall detection device  
+- React Progressive Web App frontend  
+- PostgreSQL database  
+- Fitbit Web API integration
+
+It manages authentication, alert workflows, wearable data ingestion, anomaly detection, and secure communication across the platform.
 
 ---
 
 ## Features
 
-- JWT authentication  
+- JWT user authentication  
 - User registration and login  
-- Fall alert API from Raspberry Pi  
-- Fitbit health data ingestion  
-- Caregiver acknowledgement  
-- Secure device authentication  
-- PostgreSQL database storage  
-- RESTful API endpoints  
+- Secure Raspberry Pi device authentication  
+- Fall alert ingestion API  
+- Caregiver acknowledgement workflow  
+- Fitbit OAuth integration  
+- Fitbit heart rate / sleep / activity retrieval  
+- Health anomaly detection logic  
+- PostgreSQL persistent storage  
+- RESTful API architecture  
+- Cloud deployment on Render
+
+---
 
 ## Tech Stack
 
@@ -29,8 +40,11 @@ The API securely stores health data, processes fall detection alerts, and provid
 - PostgreSQL  
 - Docker  
 - Maven
+- Render
 
-## Running the Backend
+---
+
+## Local Development Setup
 
 ### 1. Start PostgreSQL
 
@@ -38,58 +52,72 @@ The API securely stores health data, processes fall detection alerts, and provid
 docker compose up -d
 ```
 
-### 2. Run backend
+### 2. Configure Environment Variables
 
-```bash
-mvn spring-boot:run
-```
-
-Server runs on:
-
-http://localhost:8080
-
-### Environment Variables
-
-Create a .env file:
+Create a `.env` file:
 
 ```bash
 JWT_SECRET=your_secret
 DEVICE_API_KEY=your_device_key
 FITBIT_CLIENT_ID=your_client_id
 FITBIT_CLIENT_SECRET=your_client_secret
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/healthdb
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=your_password
 ```
 
-### API Overview
+### 3. Run backend
+
+```bash
+mvn spring-boot:run
+```
+
+Runs locally on:
+`http://localhost:8080`
+
+---
+
+## Deployment
+
+Final prototype deployed on Render using HTTPS with a managed PostgreSQL database.
+
+**Example API Endpoints**
 
 | Method | Endpoint | Description |
 |--------|---------|-------------|
-| POST | /auth/login | User login |
-| POST | /alerts | Create fall alert |
-| GET | /alerts | Get alert history |
-| POST | /device/alert | Raspberry Pi fall detection |
-| GET | /fitbit | Fitbit data |
+| POST | /api/auth/signin | User login |
+| POST | /api/auth/signup | User registration |
+| POST | /api/alerts/fall | Raspberry Pi fall alert |
+| GET | /api/alerts | Retrieve alerts |
+| GET | /api/fitbit/dashboard | Fitbit dashboard metrics |
+| GET | /api/auth/fitbit/connect | Start Fitbit OAuth |
 
-### Database
+---
 
-PostgreSQL database stores:
+## Database Stores
 
 - Users
-- Alerts
-- Fitbit metrics
-- Devices
-- Health records
+- Alerts 
+- Fitbit summaries
+- Device records
+- Health metrics
 
-### Architecture Role
+---
 
-The backend acts as the central communication layer:
+## Architecture Role
+
+The backend:
 
 - Receives fall alerts from Raspberry Pi
-- Retrieves Fitbit health data
-- Stores health metrics in PostgreSQL
-- Sends processed data to frontend
-- Handles authentication and security
+- Authenticates users and devices
+- Retrieves Fitbit data
+- Performs anomaly checks
+- Stores data in PostgreSQL
+- Serves frontend dashboard APIs
 
-### Author
+---
+
+## Author
 
 Louise Deeth
 
