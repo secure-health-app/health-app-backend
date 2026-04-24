@@ -37,6 +37,11 @@ public class FitbitAnomalyController {
     }
 
 
+    @GetMapping("/check-existing")
+    public ResponseEntity<AnomalyResult> checkExisting() {
+        return ResponseEntity.ok(fitbitAnomalyService.checkExistingData());
+    }
+
     /* ===================== BACKFILL DATA ===================== */
 
     // generate baseline using previous days

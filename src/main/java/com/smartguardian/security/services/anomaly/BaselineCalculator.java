@@ -30,13 +30,14 @@ public class BaselineCalculator {
     public Baseline calculate(User user) {
 
         LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
         LocalDate thirtyDaysAgo = today.minusDays(30);
 
         List<FitbitDailySummary> records = summaryRepository
                 .findByUserAndDateBetweenOrderByDateAsc(
                         user,
                         thirtyDaysAgo,
-                        today
+                        yesterday  // exclude today
                 );
 
         return Baseline.builder()

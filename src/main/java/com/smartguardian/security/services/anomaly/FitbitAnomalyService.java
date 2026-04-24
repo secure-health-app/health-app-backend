@@ -61,6 +61,20 @@ public class FitbitAnomalyService {
     }
 
 
+    /* ===================== CHECK EXISTING ===================== */
+
+    public AnomalyResult checkExistingData() {
+        User user = getAuthenticatedUser();
+
+        FitbitDailySummary todaySummary = summaryRepository
+                .findByUserAndDate(user, LocalDate.now())
+                .orElseThrow(() -> new RuntimeException("No data for today"));
+
+        Baseline baseline = baselineCalculator.calculate(user);
+        return anomalyDetector.detect(todaySummary, baseline);
+    }
+
+
     /* ===================== AUTH USER ===================== */
 
     private User getAuthenticatedUser() {
@@ -88,7 +102,7 @@ public class FitbitAnomalyService {
                     LocalDate.now().minusDays(i).toString();
 
             try {
-                fitbitApiService.fetchAndSaveDailySummary(date);
+                fitbitApiService.fetchAndSaveInternal(date);
                 System.out.println("[Backfill] Saved: " + date);
             } catch (Exception e) {
                 System.out.println("[Backfill] Skipped "
