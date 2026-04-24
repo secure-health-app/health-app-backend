@@ -42,6 +42,24 @@ public class FitbitAnomalyController {
         return ResponseEntity.ok(fitbitAnomalyService.checkExistingData());
     }
 
+    @GetMapping("/status")
+    public ResponseEntity<AnomalyResult> getAnomalyStatus() {
+        try {
+            return ResponseEntity.ok(
+                    fitbitAnomalyService.checkExistingData()
+            );
+        } catch (Exception e) {
+            // no data for today yet — return no anomaly
+            return ResponseEntity.ok(
+                    AnomalyResult.builder()
+                            .anomalyDetected(false)
+                            .message("No data available")
+                            .flags(java.util.List.of())
+                            .build()
+            );
+        }
+    }
+
     /* ===================== BACKFILL DATA ===================== */
 
     // generate baseline using previous days
