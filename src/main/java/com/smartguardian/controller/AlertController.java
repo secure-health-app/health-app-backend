@@ -358,7 +358,7 @@ public class AlertController {
     }
 
 
-    /* ===================== PROFILE SETTINGS ===================== */
+    /* ===================== CAREGIVER LINKING ===================== */
 
     // get currently linked caregiver
     @GetMapping("/caregiver-link")
@@ -466,5 +466,32 @@ public class AlertController {
             );
 
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+
+    /* ===================== ANOMALY ALERTS ===================== */
+
+    @PostMapping("/anomaly")
+    public ResponseEntity<?> createAnomalyAlert(
+            @RequestBody Map<String, String> payload,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        FallAlert alert = new FallAlert();
+        alert.setDetectedAt(Instant.now());
+        alert.setDetectionPhase("HEALTH_ANOMALY");
+        alert.setDeviceId("fitbit");
+        alert.setStatus("CONFIRMED");
+        alert.setUserName(userDetails.getUsername());
+
+        userRepository.findById(userDetails.getId()).ifPresent(user -> {
+            if (user.getCaregiverUsername() != null) {
+                alert.setAssignedCaregiver(
+                        user.getCaregiverUsername().toLowerCase()
+                );
+            }
+        });
+
+        fallAlertRepository.save(alert);
+        return ResponseEntity.ok(Map.of("message", "Anomaly alert sent"));
     }
 }
