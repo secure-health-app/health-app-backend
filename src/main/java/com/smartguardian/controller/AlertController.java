@@ -473,7 +473,7 @@ public class AlertController {
 
     @PostMapping("/anomaly")
     public ResponseEntity<?> createAnomalyAlert(
-            @RequestBody Map<String, String> payload,
+            @RequestBody Map<String, Object> payload,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         FallAlert alert = new FallAlert();
