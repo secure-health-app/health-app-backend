@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /* ===================== USER DETAILS SERVICE ===================== */
 
+// finds users in database during login
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -22,6 +23,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     /* ===================== LOAD USER ===================== */
 
+    // load user by email for Spring Security
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

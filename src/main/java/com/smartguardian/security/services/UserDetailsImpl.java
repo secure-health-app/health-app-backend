@@ -11,6 +11,7 @@ import java.util.Collection;
 
 /* ===================== USER DETAILS ===================== */
 
+// Spring Security user object used during login
 public class UserDetailsImpl implements UserDetails {
 
     private Long id;
@@ -32,6 +33,7 @@ public class UserDetailsImpl implements UserDetails {
         this.password = password;
     }
 
+    // create UserDetails from database user
     public static UserDetailsImpl build(User user) {
         return new UserDetailsImpl(
                 user.getId(),
@@ -49,6 +51,7 @@ public class UserDetailsImpl implements UserDetails {
         return email;
     }
 
+    // no roles used in this project
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
@@ -79,6 +82,7 @@ public class UserDetailsImpl implements UserDetails {
         return true;
     }
 
+    // all accounts active in this project
     @Override
     public boolean isEnabled() {
         return true;

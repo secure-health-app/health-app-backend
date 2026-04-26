@@ -13,6 +13,7 @@ import java.util.OptionalDouble;
 
 /* ===================== BASELINE CALCULATOR ===================== */
 
+// Builds personalised historical baseline from recent Fitbit summaries
 @Component
 public class BaselineCalculator {
 
@@ -27,6 +28,7 @@ public class BaselineCalculator {
 
     /* ===================== CALCULATE BASELINE ===================== */
 
+    // Uses previous 30 days excluding today to avoid biasing anomaly checks
     public Baseline calculate(User user) {
 
         LocalDate today = LocalDate.now();
@@ -78,11 +80,13 @@ public class BaselineCalculator {
 
     /* ===================== MATHS ===================== */
 
+    // Returns arithmetic mean, or 0 when no values exist
     private double mean(java.util.stream.IntStream stream) {
         OptionalDouble result = stream.average();
         return result.orElse(0.0);
     }
 
+    // Measures normal day-to-day variation around the average
     private double stdDev(java.util.stream.IntStream stream) {
         int[] values = stream.toArray();
 

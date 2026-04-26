@@ -21,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /* ===================== AUTH TOKEN FILTER ===================== */
 
+// Intercepts incoming requests and authenticates valid JWT tokens
 public class AuthTokenFilter extends OncePerRequestFilter {
 
 
@@ -53,6 +54,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
             String jwt = parseJwt(request);
 
+            // Only trusted, non-expired tokens create authenticated sessions
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
                 String email =
                         jwtUtils.getUserNameFromJwtToken(jwt);
@@ -81,6 +83,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     /* ===================== PARSE JWT ===================== */
 
+    // Extract Bearer token from Authorization header
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
 

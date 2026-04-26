@@ -21,6 +21,7 @@ import java.util.Map;
 
 /* ===================== FITBIT AUTH SERVICE ===================== */
 
+// Handles Fitbit login and token saving
 @Service
 public class FitbitAuthService {
 

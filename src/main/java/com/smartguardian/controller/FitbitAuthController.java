@@ -43,6 +43,7 @@ public class FitbitAuthController {
             HttpServletResponse response
     ) throws IOException {
 
+        // Minimum Fitbit permissions needed for dashboard metrics
         String scopes = "activity heartrate sleep";
 
         String authUrl =
@@ -51,6 +52,7 @@ public class FitbitAuthController {
                         "&client_id=" + clientId +
                         "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) +
                         "&scope=" + URLEncoder.encode(scopes, StandardCharsets.UTF_8) +
+                        // Reuse logged-in JWT in OAuth state so callback can identify the user account
                         "&state=" + token;
 
         response.sendRedirect(authUrl);
@@ -70,7 +72,7 @@ public class FitbitAuthController {
         // exchange code for tokens
         fitbitAuthService.exchangeCodeAndSaveTokens(code, state);
 
-        // redirect back to frontend
+        // Return user to dashboard and trigger frontend refresh flow
         response.sendRedirect(
                 frontendUrl + "/?fitbit=connected"
         );

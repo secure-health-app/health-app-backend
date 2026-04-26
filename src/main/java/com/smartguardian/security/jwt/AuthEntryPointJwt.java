@@ -18,11 +18,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /* ===================== AUTH ENTRY POINT ===================== */
 
+// Returns JSON 401 responses when protected endpoints are accessed without valid authentication
 @Component
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
 
+    // Triggered automatically by Spring Security after authentication failure
     @Override
     public void commence(
             HttpServletRequest request,
@@ -30,6 +32,7 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
             AuthenticationException authException
     ) throws IOException, ServletException {
 
+        // Log failed access attempts for debugging/security monitoring
         logger.error(
                 "Unauthorized error: {} - {} {}",
                 authException.getMessage(),

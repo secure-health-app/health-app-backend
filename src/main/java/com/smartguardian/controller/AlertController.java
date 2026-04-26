@@ -35,13 +35,14 @@ public class AlertController {
 
     /* ===================== PI ENDPOINT ===================== */
 
-    // Raspberry Pi sends fall alert here
+    // Authenticated Raspberry Pi device posts locally detected fall events
+    // Uses device API key instead of user JWT authentication
     @PostMapping("/fall")
     public ResponseEntity<?> receiveFallAlert(
             @RequestHeader("X-Device-Key") String apiKey,
             @RequestBody Map<String, Object> payload) {
 
-        // check device API key
+        // Prevent unauthorised devices spoofing emergency alerts
         if (!deviceApiKey.equals(apiKey)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid device API key"));
@@ -57,7 +58,7 @@ public class AlertController {
         String detectionPhase =
                 (String) payload.getOrDefault("detectionPhase", "UNKNOWN");
 
-        // create alert (starts as pending)
+        // Pi-generated falls start as PENDING until user confirms or cancels
         FallAlert alert =
                 new FallAlert(Instant.now(), peakAcceleration, detectionPhase, deviceId);
 
@@ -89,7 +90,8 @@ public class AlertController {
         alert.setDetectedAt(Instant.now());
         alert.setDetectionPhase("MANUAL_SOS");
         alert.setDeviceId("patient-app");
-        alert.setStatus("CONFIRMED"); // manual press
+        // Manual SOS bypasses countdown because user explicitly requested help
+        alert.setStatus("CONFIRMED");
 
         // optional GPS location
         if (payload != null) {
@@ -209,6 +211,7 @@ public class AlertController {
 
         FallAlert alert = alertOpt.get();
 
+        // User accepted help request after countdown modal
         alert.setStatus("CONFIRMED");
         alert.setAcknowledged(true);
 
@@ -326,7 +329,7 @@ public class AlertController {
 
     // caregiver responds to alert
     @PostMapping("/caregiver/{id}/resolve")
-    public ResponseEntity<?> resolveAlert(
+    public ResponseEntity<?> respondToAlert(
             @PathVariable Long id,
             @RequestBody Map<String, String> payload) {
 
@@ -360,7 +363,7 @@ public class AlertController {
 
     /* ===================== CAREGIVER LINKING ===================== */
 
-    // get currently linked caregiver
+    // Allows patient account to nominate caregiver account by email
     @GetMapping("/caregiver-link")
     public ResponseEntity<?> getCaregiverLink(
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -422,6 +425,7 @@ public class AlertController {
 
     /* ===================== USER ALERT STATUS ===================== */
 
+    // Lets user app see caregiver responses (on the way / emergency called)
     @GetMapping("/user/latest")
     public ResponseEntity<?> getLatestUserAlert(
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -452,6 +456,7 @@ public class AlertController {
 
     /* ===================== USER MARK SEEN ===================== */
 
+    // Prevent repeat caregiver banners after user has viewed message
     @PostMapping("/user/{id}/mark-seen")
     public ResponseEntity<?> markAlertSeenByUser(@PathVariable Long id) {
 
@@ -471,6 +476,7 @@ public class AlertController {
 
     /* ===================== ANOMALY ALERTS ===================== */
 
+    // Creates caregiver-visible alert from Fitbit anomaly detection service
     @PostMapping("/anomaly")
     public ResponseEntity<?> createAnomalyAlert(
             @RequestBody Map<String, Object> payload,

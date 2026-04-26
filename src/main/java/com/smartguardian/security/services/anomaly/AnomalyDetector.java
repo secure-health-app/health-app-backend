@@ -9,6 +9,7 @@ import java.util.List;
 
 /* ===================== ANOMALY DETECTOR ===================== */
 
+// Compares today's Fitbit metrics against rolling historical baseline
 @Component
 public class AnomalyDetector {
 
@@ -18,6 +19,7 @@ public class AnomalyDetector {
     // Minimum days of data needed before anomaly detection is meaningful
     private static final int MIN_RECORDS = 7;
 
+    // Returns anomaly flags for today's summary using z-score comparisons
     public AnomalyResult detect(
             FitbitDailySummary today,
             Baseline baseline

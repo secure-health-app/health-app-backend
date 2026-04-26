@@ -12,11 +12,11 @@ import com.smartguardian.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    /* ===================== AUTH ===================== */
     Optional<User> findByEmail(String email);
-
     Boolean existsByEmail(String email);
 
+    /* ===================== USER LOOKUP ===================== */
     Optional<User> findByUsername(String username);
-
     Boolean existsByUsername(String username);
 }

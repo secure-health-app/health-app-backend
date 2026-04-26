@@ -27,6 +27,7 @@ import java.util.Map;
 
 /* ===================== FITBIT API SERVICE ===================== */
 
+// Handles Fitbit API calls and saves daily data
 @Service
 public class FitbitApiService {
 
@@ -106,7 +107,7 @@ public class FitbitApiService {
 
     /* ===================== FETCH AND SAVE ===================== */
 
-    // internal method — returns entity for anomaly detection
+    // gets Fitbit data and saves it to the database
     public FitbitDailySummary fetchAndSaveInternal(String date) {
 
         User user = getAuthenticatedUser();
@@ -362,6 +363,7 @@ public class FitbitApiService {
                 );
     }
 
+    // stop request if user has not linked Fitbit
     private void ensureFitbitConnected(User user) {
         if (user.getFitbitAccessToken() == null || user.getFitbitAccessToken().isBlank()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fitbit not connected");

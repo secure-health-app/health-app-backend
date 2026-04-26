@@ -21,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 /* ===================== SECURITY CONFIG ===================== */
 
+// main security settings for the app
 @Configuration
 @EnableMethodSecurity
 public class WebSecurityConfig {
@@ -35,6 +36,7 @@ public class WebSecurityConfig {
 
     /* ===================== FILTER ===================== */
 
+    // checks JWT token on requests
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
 
@@ -44,6 +46,7 @@ public class WebSecurityConfig {
 
     /* ===================== AUTH MANAGER ===================== */
 
+    // handles login checks
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration authConfig
@@ -54,6 +57,7 @@ public class WebSecurityConfig {
 
     /* ===================== PASSWORD ENCODER ===================== */
 
+    // hashes passwords before saving
     @Bean
     public PasswordEncoder passwordEncoder() {
 
@@ -62,6 +66,7 @@ public class WebSecurityConfig {
 
     /* ===================== SECURITY FILTER CHAIN ===================== */
 
+    // set which routes are public or protected
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -122,6 +127,7 @@ public class WebSecurityConfig {
 
     /* ===================== CORS ===================== */
 
+    // allow frontend to call backend API
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
 

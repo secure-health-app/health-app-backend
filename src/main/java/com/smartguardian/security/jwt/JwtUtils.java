@@ -20,6 +20,7 @@ import io.jsonwebtoken.security.Keys;
 
 /* ===================== JWT UTILS ===================== */
 
+// Creates, parses, and validates JWT tokens for API authentication
 @Component
 public class JwtUtils {
 
@@ -36,12 +37,14 @@ public class JwtUtils {
 
     /* ===================== GENERATE TOKEN ===================== */
 
+    // Build signed token containing user identity and expiry timestamp
     public String generateJwtToken(Authentication authentication) {
 
         UserDetailsImpl userPrincipal =
                 (UserDetailsImpl) authentication.getPrincipal();
 
         return Jwts.builder()
+                // Store email/username as token subject identifier
                 .subject((userPrincipal.getUsername()))
                 .issuedAt(new Date())
                 .expiration(
@@ -53,7 +56,6 @@ public class JwtUtils {
                 .signWith(key())
                 .compact();
     }
-
 
 
     /* ===================== SECRET KEY ===================== */
@@ -81,6 +83,7 @@ public class JwtUtils {
 
     /* ===================== VALIDATE TOKEN ===================== */
 
+    // Checks signature integrity, expiry date, and token format
     public boolean validateJwtToken(String authToken) {
         try {
             Jwts.parser()

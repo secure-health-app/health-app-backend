@@ -40,23 +40,24 @@ public class FallAlert {
 
     /* ===================== USER FLAGS ===================== */
 
-    // whether the user has seen this alert
+    // prevents repeat caregiver status banners once viewed
     private boolean seenByUser = false;
 
 
     /* ===================== STATUS ===================== */
 
-    // PENDING   = Pi detected fall, waiting for patient to respond
-    // CONFIRMED = patient confirmed / SOS pressed or countdown expired - shows on caregiver view
-    // CANCELLED = patient said false alarm
-    // RESOLVED  = caregiver acknowledged and responded
+    // PENDING = Pi detected fall, waiting for user response
+    // CONFIRMED = help required and visible to caregiver
+    // CANCELLED = false alarm dismissed by user
+    // CAREGIVER_ON_THE_WAY = caregiver acknowledged and is travelling
+    // EMERGENCY_SERVICES_CALLED = caregiver escalated to emergency services
     @Column(nullable = false)
     private String status = "PENDING";
 
 
     /* ===================== CAREGIVER FLAGS ===================== */
 
-    // Acknowledged by caregiver in the dashboard
+    // tracks whether caregiver has responded to active alert
     private boolean acknowledged = false;
 
     // GPS coordinates captured from the user's browser when they confirm

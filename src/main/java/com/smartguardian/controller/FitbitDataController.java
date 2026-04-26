@@ -24,7 +24,7 @@ public class FitbitDataController {
 
     /* ===================== DASHBOARD ===================== */
 
-    // get combined dashboard data
+    // Fetch latest Fitbit metrics and return combined dashboard summary
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboard() {
 

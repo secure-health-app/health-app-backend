@@ -36,12 +36,13 @@ public class FitbitAnomalyController {
         return ResponseEntity.ok(result);
     }
 
-
+    // Evaluate already stored Fitbit summaries without fetching new API data
     @GetMapping("/check-existing")
     public ResponseEntity<AnomalyResult> checkExisting() {
         return ResponseEntity.ok(fitbitAnomalyService.checkExistingData());
     }
 
+    // Frontend polling endpoint used by dashboard banners and caregiver alerts
     @GetMapping("/status")
     public ResponseEntity<AnomalyResult> getAnomalyStatus() {
         try {
@@ -49,7 +50,7 @@ public class FitbitAnomalyController {
                     fitbitAnomalyService.checkExistingData()
             );
         } catch (Exception e) {
-            // no data for today yet — return no anomaly
+            // If today's Fitbit data not available yet, return safe no-alert response
             return ResponseEntity.ok(
                     AnomalyResult.builder()
                             .anomalyDetected(false)
@@ -62,7 +63,7 @@ public class FitbitAnomalyController {
 
     /* ===================== BACKFILL DATA ===================== */
 
-    // generate baseline using previous days
+    // Populate historical summaries to build rolling anomaly baseline
     @PostMapping("/backfill")
     public ResponseEntity<String> backfill(
             @RequestParam(defaultValue = "30") int days) {

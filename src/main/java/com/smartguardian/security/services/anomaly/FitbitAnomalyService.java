@@ -16,6 +16,7 @@ import java.time.LocalDate;
 
 /* ===================== FITBIT ANOMALY SERVICE ===================== */
 
+// Coordinates Fitbit data retrieval, baseline creation, and anomaly checks
 @Service
 public class FitbitAnomalyService {
 
@@ -42,6 +43,7 @@ public class FitbitAnomalyService {
 
     /* ===================== CHECK TODAY ===================== */
 
+    // Pull fresh Fitbit data before running anomaly detection
     public AnomalyResult checkTodaysAnomalies() {
 
         User user = getAuthenticatedUser();
@@ -63,6 +65,7 @@ public class FitbitAnomalyService {
 
     /* ===================== CHECK EXISTING ===================== */
 
+    // Reuse stored summaries to avoid unnecessary Fitbit API calls
     public AnomalyResult checkExistingData() {
         User user = getAuthenticatedUser();
 
@@ -77,6 +80,7 @@ public class FitbitAnomalyService {
 
     /* ===================== AUTH USER ===================== */
 
+    // Get the currently logged in user
     private User getAuthenticatedUser() {
 
         Authentication auth =
